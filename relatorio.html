@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório — Dark UX Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+  // Mesma URL do Apps Script usada no index.html
+  window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbzUaiSl0J2rOzC4SfxYJK3aXRJixc3fCoVpRAyKw61LcCz5ZCB7lAiDRG_XIug59c0SIA/exec";
+</script>
+
+<style>
+  :root {
+    --bg: #0e0d0b;
+    --bg-soft: #181613;
+    --bg-card: #1f1c18;
+    --border: #2d2925;
+    --ink: #f4ede0;
+    --muted: #8a8175;
+    --accent: #ff5722;
+    --accent-soft: rgba(255, 87, 34, 0.15);
+    --warn: #ffb547;
+    --good: #4ade80;
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Inter', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(255, 87, 34, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(255, 87, 34, 0.04) 0%, transparent 50%);
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  /* ===== HEADER ===== */
+  header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 48px; flex-wrap: wrap; gap: 16px;
+    border-bottom: 1px solid var(--border); padding-bottom: 24px;
+  }
+  .title-block { flex: 1; min-width: 280px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(36px, 5vw, 64px); line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 16px; margin-top: 8px; }
+
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 100px; font-size: 12px;
+    font-family: var(--mono); color: var(--muted);
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--good); animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+  }
+
+  /* ===== HERO STATS ===== */
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 48px;
+  }
+  .hero-stat {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+  }
+  .hero-stat-label {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+  .hero-stat-value {
+    font-family: var(--display); font-weight: 900;
+    font-size: 56px; line-height: 1; letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+  .hero-stat-suffix { font-size: 24px; color: var(--muted); }
+  .hero-stat-extra {
+    font-size: 13px; color: var(--muted); margin-top: 8px;
+  }
+
+  /* ===== CHAMADAS PRINCIPAIS (cartões grandes) ===== */
+  .calls-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px; margin-bottom: 48px;
+  }
+  .call-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; position: relative; overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .call-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .call-card.featured {
+    background: linear-gradient(135deg, #2a1a0e, #1f1612);
+    border-color: var(--accent);
+    grid-column: span 2;
+  }
+  @media (max-width: 800px) { .call-card.featured { grid-column: span 1; } }
+
+  .call-emoji { font-size: 36px; margin-bottom: 16px; display: block; }
+  .call-headline {
+    font-family: var(--display); font-weight: 800;
+    font-size: 26px; line-height: 1.15; letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .call-card.featured .call-headline { font-size: 34px; }
+  .call-headline .num {
+    color: var(--accent); font-style: italic;
+  }
+  .call-desc {
+    color: var(--muted); font-size: 14px; line-height: 1.5;
+  }
+  .pattern-tag {
+    display: inline-block; font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 4px 10px; border-radius: 4px; margin-top: 16px;
+  }
+
+  /* ===== SEÇÕES ===== */
+  section { margin-bottom: 56px; }
+  .section-title {
+    font-family: var(--display); font-weight: 700;
+    font-size: 28px; letter-spacing: -0.02em;
+    margin-bottom: 24px; display: flex; align-items: baseline; gap: 12px;
+  }
+  .section-title small {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); font-weight: 400;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* ===== TABELA DE CULPADOS ===== */
+  .culprits-list {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .culprit-row {
+    display: grid; grid-template-columns: 1fr auto;
+    padding: 16px 24px; border-bottom: 1px solid var(--border);
+    align-items: center; gap: 12px;
+  }
+  .culprit-row:last-child { border-bottom: none; }
+  .culprit-name {
+    font-family: var(--display); font-size: 18px; font-weight: 600;
+  }
+  .culprit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .culprit-tag {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .culprit-score {
+    font-family: var(--display); font-weight: 900;
+    font-size: 32px; color: var(--accent); line-height: 1;
+  }
+  .culprit-score small { font-size: 12px; color: var(--muted); }
+
+  /* ===== BARRAS HORIZONTAIS ===== */
+  .bar-list {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+  }
+  .bar-item { margin-bottom: 18px; }
+  .bar-item:last-child { margin-bottom: 0; }
+  .bar-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px; gap: 12px;
+  }
+  .bar-label { font-size: 14px; font-weight: 500; }
+  .bar-label-pattern {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    color: var(--muted); text-transform: uppercase;
+    margin-left: 8px;
+  }
+  .bar-value {
+    font-family: var(--display); font-weight: 700; font-size: 18px;
+    font-variant-numeric: tabular-nums; color: var(--accent);
+  }
+  .bar-value small { color: var(--muted); font-size: 12px; font-weight: 400; }
+  .bar-track {
+    height: 10px; background: var(--bg); border-radius: 5px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #ff8855);
+    border-radius: 5px; transition: width 1s ease;
+  }
+
+  /* ===== ESTADO VAZIO / LOADING ===== */
+  .empty {
+    text-align: center; padding: 80px 20px; color: var(--muted);
+  }
+  .empty h3 { font-family: var(--display); font-size: 28px; color: var(--ink); margin-bottom: 8px; }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== CONTROLES ===== */
+  .controls {
+    display: flex; gap: 8px; margin-bottom: 24px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .btn {
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--ink); padding: 10px 18px; border-radius: 8px;
+    font-family: var(--body); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .footer-note {
+    text-align: center; color: var(--muted); font-size: 12px;
+    font-family: var(--mono); margin-top: 60px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 700px) {
+    .container { padding: 24px 16px; }
+    .hero-stat-value { font-size: 42px; }
+    .call-card { padding: 24px; }
+    .call-headline { font-size: 22px !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="title-block">
+      <div class="eyebrow">Apresentação de Ética · Dark UX Patterns</div>
+      <h1>Quem caiu nas <em>armadilhas</em>?</h1>
+      <p class="subtitle">Relatório em tempo real das respostas da turma.</p>
+    </div>
+    <div class="live-pill">
+      <span class="live-dot"></span>
+      <span id="liveStatus">Conectado · atualizando</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="btn" onclick="reload()">↻ Atualizar agora</button>
+    <button class="btn active" id="autoBtn" onclick="toggleAuto()">⏱ Auto-refresh: ON</button>
+    <span style="color: var(--muted); font-size: 12px; margin-left: auto;" id="lastUpdate">—</span>
+  </div>
+
+  <main id="content">
+    <div class="empty">
+      <div class="spinner"></div>
+      <p>Carregando respostas...</p>
+    </div>
+  </main>
+
+  <div class="footer-note">
+    Dark UX Patterns · Insper · Ética em Computação
+  </div>
+</div>
+
+<script>
+let respostas = [];
+let autoRefresh = true;
+let autoInterval = null;
+
+function pct(part, total) {
+  if (!total) return 0;
+  return Math.round((part / total) * 100);
+}
+
+function asBool(v) {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'string') return v.toLowerCase() === 'true' || v === '1';
+  return false;
+}
+
+/**
+ * Busca os dados via JSONP — contorna CORS de forma simples.
+ * Apps Script aceita ?callback=xxx e devolve `xxx({...})` como JS.
+ */
+function fetchData() {
+  return new Promise((resolve, reject) => {
+    const cbName = '__darkux_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('timeout'));
+    }, 15000);
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      script.remove();
+    }
+    window[cbName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => { cleanup(); reject(new Error('script error')); };
+    script.src = window.SHEETS_URL + '?callback=' + cbName + '&t=' + Date.now();
+    document.body.appendChild(script);
+  });
+}
+
+async function reload() {
+  document.getElementById('liveStatus').textContent = 'Atualizando...';
+  try {
+    const data = await fetchData();
+    if (data && data.ok && Array.isArray(data.respostas)) {
+      respostas = data.respostas;
+      render();
+      document.getElementById('liveStatus').textContent = 'Conectado · atualizando';
+      document.getElementById('lastUpdate').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
+    } else {
+      throw new Error('resposta inválida');
+    }
+  } catch(e) {
+    console.error(e);
+    document.getElementById('liveStatus').textContent = 'Erro ao conectar';
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <h3>Não consegui carregar os dados</h3>
+        <p>Verifique se o Apps Script foi reimplantado depois das mudanças do GET. ${e.message}</p>
+      </div>
+    `;
+  }
+}
+
+function toggleAuto() {
+  autoRefresh = !autoRefresh;
+  const btn = document.getElementById('autoBtn');
+  if (autoRefresh) {
+    btn.classList.add('active');
+    btn.textContent = '⏱ Auto-refresh: ON';
+    autoInterval = setInterval(reload, 15000);
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '⏱ Auto-refresh: OFF';
+    clearInterval(autoInterval);
+  }
+}
+
+function render() {
+  const total = respostas.length;
+  if (total === 0) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty">
+        <h3>Aguardando primeiras vítimas...</h3>
+        <p>Quando os alunos começarem a responder, os dados aparecem aqui automaticamente.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Calcula métricas
+  const m = {
+    aceitouTermos: respostas.filter(r => asBool(r.aceitouTermos)).length,
+    newsletter: respostas.filter(r => asBool(r.aceitouNewsletter)).length,
+    compartilhar47: respostas.filter(r => asBool(r.pref_compartilhar47)).length,
+    naoExcluido: respostas.filter(r => asBool(r.pref_naoExcluido)).length,
+    naoOfertas: respostas.filter(r => asBool(r.pref_naoOfertas)).length,
+    backup: respostas.filter(r => asBool(r.addon_backup)).length,
+    antivirus: respostas.filter(r => asBool(r.addon_antivirus)).length,
+    seguro: respostas.filter(r => asBool(r.addon_seguro)).length,
+    cartao: respostas.filter(r => asBool(r.forneceuCartao)).length,
+    convidouAmigos: respostas.filter(r => asBool(r.convidouAmigos)).length,
+    permitiuSpam: respostas.filter(r => asBool(r.permitiuSpam)).length,
+    timeout: respostas.filter(r => r.timeoutEm && String(r.timeoutEm).startsWith('step_')).length,
+    planoFree: respostas.filter(r => r.planoEscolhido === 'free').length,
+    planoPro: respostas.filter(r => r.planoEscolhido === 'pro').length,
+    planoUltra: respostas.filter(r => r.planoEscolhido === 'ultra').length,
+  };
+
+  // Calcula "score de vulnerabilidade" por aluno
+  const scored = respostas.map(r => {
+    const tags = [];
+    let score = 0;
+    if (asBool(r.aceitouTermos)) { score++; tags.push('Alma'); }
+    if (asBool(r.aceitouNewsletter)) { score++; tags.push('Newsletter'); }
+    if (asBool(r.pref_compartilhar47)) { score++; tags.push('47 parceiros'); }
+    if (asBool(r.addon_backup)) { score++; tags.push('Backup'); }
+    if (asBool(r.addon_antivirus)) { score++; tags.push('Antivírus'); }
+    if (asBool(r.addon_seguro)) { score++; tags.push('Seguro'); }
+    if (asBool(r.forneceuCartao)) { score++; tags.push('Cartão'); }
+    if (asBool(r.convidouAmigos)) { score++; tags.push('Friend Spam'); }
+    return { nome: r.nome || '(anônimo)', score, tags };
+  }).sort((a, b) => b.score - a.score);
+
+  const top5 = scored.slice(0, 5);
+
+  // Adicionais "embutidos sem perceber" (todos 3 marcados)
+  const todosAddons = respostas.filter(r =>
+    asBool(r.addon_backup) && asBool(r.addon_antivirus) && asBool(r.addon_seguro)
+  ).length;
+
+  const html = `
+    <!-- HERO STATS -->
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Total de respostas</div>
+        <div class="hero-stat-value">${total}</div>
+        <div class="hero-stat-extra">${m.timeout} não terminaram a tempo</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Aceitaram os termos</div>
+        <div class="hero-stat-value">${pct(m.aceitouTermos, total)}<span class="hero-stat-suffix">%</span></div>
+        <div class="hero-stat-extra">${m.aceitouTermos} de ${total} pessoas</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Deram o cartão</div>
+        <div class="hero-stat-value">${pct(m.cartao, total)}<span class="hero-stat-suffix">%</span></div>
+        <div class="hero-stat-extra">${m.cartao} pessoas confiaram demais</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Caíram em pelo menos 5</div>
+        <div class="hero-stat-value">${scored.filter(s => s.score >= 5).length}</div>
+        <div class="hero-stat-extra">vítimas múltiplas</div>
+      </div>
+    </div>
+
+    <!-- CHAMADAS GRANDES -->
+    <section>
+      <div class="calls-grid">
+        <div class="call-card featured">
+          <span class="call-emoji">😈</span>
+          <div class="call-headline">
+            <span class="num">${m.aceitouTermos}</span> ${m.aceitouTermos === 1 ? 'pessoa vendeu' : 'pessoas venderam'} a alma pro diabo
+          </div>
+          <div class="call-desc">
+            Aceitaram termos com cláusulas de cessão de alma, nomeação do primogênito por R$ 3,50, doação do rim direito como garantia de pagamento e publicação de conversas privadas no Instagram.
+          </div>
+          <span class="pattern-tag">Privacy Zuckering</span>
+        </div>
+
+        <div class="call-card">
+          <span class="call-emoji">💳</span>
+          <div class="call-headline">
+            <span class="num">${m.cartao}</span> ${m.cartao === 1 ? 'aluno digitou' : 'alunos digitaram'} dados de cartão
+          </div>
+          <div class="call-desc">
+            Aceitaram cobrança automática mensal de R$ 49 + adicionais. Cancelamento exigia ligar entre 3h e 4h da manhã.
+          </div>
+          <span class="pattern-tag">Forced Continuity</span>
+        </div>
+
+        <div class="call-card">
+          <span class="call-emoji">🛒</span>
+          <div class="call-headline">
+            <span class="num">${todosAddons}</span> ${todosAddons === 1 ? 'levou' : 'levaram'} todos os 3 adicionais sem perceber
+          </div>
+          <div class="call-desc">
+            Backup (R$19) + Antivírus (R$14) + Seguro (R$9) já vinham marcados. Total: R$ 42 a mais por mês.
+          </div>
+          <span class="pattern-tag">Sneak into Basket</span>
+        </div>
+
+        <div class="call-card">
+          <span class="call-emoji">📤</span>
+          <div class="call-headline">
+            <span class="num">${m.compartilhar47}</span> ${m.compartilhar47 === 1 ? 'autorizou' : 'autorizaram'} compartilhar dados com 47 parceiros
+          </div>
+          <div class="call-desc">
+            Caíram na pergunta com dupla negação e checkboxes pré-marcados.
+          </div>
+          <span class="pattern-tag">Trick Question</span>
+        </div>
+
+        <div class="call-card">
+          <span class="call-emoji">📨</span>
+          <div class="call-headline">
+            <span class="num">${m.convidouAmigos}</span> ${m.convidouAmigos === 1 ? 'aluno expôs amigos' : 'alunos expuseram amigos'} ao spam
+          </div>
+          <div class="call-desc">
+            Forneceram e-mails de outras pessoas pra receberem convites em seu nome.
+          </div>
+          <span class="pattern-tag">Friend Spam</span>
+        </div>
+
+        <div class="call-card">
+          <span class="call-emoji">😅</span>
+          <div class="call-headline">
+            <span class="num">${m.newsletter}</span> ${m.newsletter === 1 ? 'caiu' : 'caíram'} no constrangimento
+          </div>
+          <div class="call-desc">
+            Aceitaram a newsletter porque o botão "não" dizia que a pessoa preferia "continuar perdendo tempo e não evoluir profissionalmente".
+          </div>
+          <span class="pattern-tag">Confirmshaming</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOP 5 VÍTIMAS -->
+    <section>
+      <div class="section-title">
+        Top 5 vítimas <small>quem caiu em mais armadilhas</small>
+      </div>
+      <div class="culprits-list">
+        ${top5.map((s, i) => `
+          <div class="culprit-row">
+            <div>
+              <div class="culprit-name">${i + 1}. ${escapeHtml(s.nome)}</div>
+              <div class="culprit-tags">
+                ${s.tags.map(t => `<span class="culprit-tag">${escapeHtml(t)}</span>`).join('')}
+              </div>
+            </div>
+            <div class="culprit-score">${s.score}<small>/8</small></div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+
+    <!-- BARRAS DETALHADAS -->
+    <section>
+      <div class="section-title">
+        Quebra por técnica <small>quanto cada pattern pegou</small>
+      </div>
+      <div class="bar-list">
+        ${barRow('Aceitaram termos absurdos', m.aceitouTermos, total, 'Privacy Zuckering')}
+        ${barRow('Aceitaram newsletter (botão humilhante)', m.newsletter, total, 'Confirmshaming')}
+        ${barRow('Compartilhar dados com 47 parceiros', m.compartilhar47, total, 'Trick Question')}
+        ${barRow('Adicional: Backup (+R$19/mês)', m.backup, total, 'Sneak into Basket')}
+        ${barRow('Adicional: Antivírus (+R$14/mês)', m.antivirus, total, 'Sneak into Basket')}
+        ${barRow('Adicional: Seguro (+R$9/mês)', m.seguro, total, 'Sneak into Basket')}
+        ${barRow('Forneceram cartão de crédito', m.cartao, total, 'Forced Continuity')}
+        ${barRow('Convidaram amigos (spam)', m.convidouAmigos, total, 'Friend Spam')}
+      </div>
+    </section>
+
+    <!-- DISTRIBUIÇÃO DE PLANO -->
+    <section>
+      <div class="section-title">
+        Plano escolhido <small>misdirection — o "Pro" vinha pré-selecionado</small>
+      </div>
+      <div class="bar-list">
+        ${barRow('Básico (gratuito) — escolha consciente', m.planoFree, total)}
+        ${barRow('Pro (R$49/mês) — pré-selecionado', m.planoPro, total)}
+        ${barRow('Ultra (R$149/mês)', m.planoUltra, total)}
+      </div>
+    </section>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function barRow(label, value, total, pattern) {
+  const p = pct(value, total);
+  return `
+    <div class="bar-item">
+      <div class="bar-header">
+        <div class="bar-label">
+          ${escapeHtml(label)}
+          ${pattern ? `<span class="bar-label-pattern">${escapeHtml(pattern)}</span>` : ''}
+        </div>
+        <div class="bar-value">${p}% <small>(${value}/${total})</small></div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: ${p}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Inicializa
+reload();
+autoInterval = setInterval(reload, 15000);
+</script>
+</body>
+</html>

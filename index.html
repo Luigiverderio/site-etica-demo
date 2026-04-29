@@ -57,6 +57,64 @@
     padding: 48px; box-shadow: var(--shadow); animation: fadeIn 0.4s ease;
   }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== BARRA GLOBAL DE TIMER (sticky no topo) ===== */
+  .global-timer {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    z-index: 1000;
+    padding: 12px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .global-timer-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 13px; font-weight: 500;
+  }
+  .global-timer-icon { font-size: 18px; }
+  .global-timer-label { color: var(--ink); flex-shrink: 0; }
+  .global-timer-time {
+    font-weight: 700; color: var(--danger);
+    font-variant-numeric: tabular-nums; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .global-timer-bar {
+    flex: 1; height: 6px; background: var(--bg-alt);
+    border-radius: 3px; overflow: hidden; min-width: 80px;
+  }
+  .global-timer-fill {
+    height: 100%; width: 100%;
+    background: linear-gradient(90deg, var(--success), #f4c896, var(--accent), var(--danger));
+    background-size: 200% 100%;
+    transform-origin: left;
+    transition: transform 1s linear, background-position 1s linear;
+  }
+  .global-timer.warning .global-timer-fill {
+    animation: pulseWarn 0.8s infinite alternate;
+  }
+  @keyframes pulseWarn {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+  }
+  body.has-global-timer { padding-top: 56px; }
+
+  /* MODAL de tempo esgotado */
+  .timeout-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000; padding: 20px;
+    animation: fadeIn 0.3s;
+  }
+  .timeout-modal {
+    background: white; border-radius: 16px; padding: 40px;
+    max-width: 420px; width: 100%; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .timeout-modal h3 { font-family: var(--display); font-size: 24px; margin-bottom: 12px; }
+
   h1 {
     font-family: var(--display); font-weight: 800;
     font-size: clamp(28px, 4vw, 42px); line-height: 1.1;
@@ -183,7 +241,18 @@
   }
 </style>
 </head>
-<body>
+<body class="has-global-timer">
+
+<div class="global-timer" id="globalTimer">
+  <div class="global-timer-inner">
+    <span class="global-timer-icon">⏱️</span>
+    <span class="global-timer-label">Tempo restante para completar o cadastro:</span>
+    <span class="global-timer-time" id="globalTimerTime">5:00</span>
+    <div class="global-timer-bar">
+      <div class="global-timer-fill" id="globalTimerBar"></div>
+    </div>
+  </div>
+</div>
 
 <div class="container">
   <div class="brand">
@@ -208,6 +277,62 @@ function logEvent(name, data = {}) {
 
 function persistLocal() {
   try { localStorage.setItem('darkux_session', JSON.stringify(state)); } catch(e) {}
+}
+
+/* ============================================================
+   TIMER GLOBAL — 5 minutos pra completar tudo
+   ============================================================ */
+const TOTAL_SECONDS = 3 * 60;
+let secondsLeft = TOTAL_SECONDS;
+let timerEnded = false;
+
+function startGlobalTimer() {
+  const timeEl = document.getElementById('globalTimerTime');
+  const barEl = document.getElementById('globalTimerBar');
+  const wrapEl = document.getElementById('globalTimer');
+
+  function tick() {
+    if (timerEnded) return;
+    if (secondsLeft <= 0) {
+      timerEnded = true;
+      onTimeout();
+      return;
+    }
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    if (timeEl) timeEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    const pct = secondsLeft / TOTAL_SECONDS;
+    if (barEl) {
+      barEl.style.transform = `scaleX(${pct})`;
+      // muda gradiente conforme o tempo passa
+      barEl.style.backgroundPosition = `${(1 - pct) * 100}% 0`;
+    }
+    if (wrapEl) {
+      if (secondsLeft <= 30) wrapEl.classList.add('warning');
+      else wrapEl.classList.remove('warning');
+    }
+    secondsLeft--;
+  }
+
+  tick();
+  window.__globalTimer = setInterval(tick, 1000);
+}
+
+function onTimeout() {
+  if (window.__globalTimer) { clearInterval(window.__globalTimer); window.__globalTimer = null; }
+  // Salva o que tem antes de bloquear
+  state.responses.timeoutEm = `step_${state.step}`;
+  saveToSheets(true);
+  // Bloqueia tela
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="timeout-overlay">
+      <div class="timeout-modal">
+        <div style="font-size:48px; margin-bottom:8px;">⏰</div>
+        <h3>Tempo esgotado!</h3>
+        <p>O tempo para completar o cadastro acabou. Sua sessão foi encerrada.</p>
+      </div>
+    </div>
+  `);
 }
 
 /* Salva no Google Sheets via Apps Script.
@@ -386,7 +511,7 @@ screens.push({
     <div class="step-counter">Etapa 5 de 7</div>
     <div class="urgency-banner">
       <span class="urgency-icon">🔥</span>
-      <div>Oferta especial expira em <span class="timer" id="timer">04:59</span> — não perca!</div>
+      <div>Oferta especial expira em <span class="timer" id="timer">01:00</span> — não perca!</div>
     </div>
     <h2>Escolha seu plano</h2>
     <p>Comece com 7 dias grátis. Cancele quando quiser*.</p>
@@ -434,11 +559,11 @@ screens.push({
   },
   onMount: () => {
     window.__selectedPlan = 'pro';
-    let secs = 299;
+    let secs = 60;
     const tEl = document.getElementById('timer');
     window.__timerInterval = setInterval(() => {
       secs--;
-      if (secs < 0) secs = 299;
+      if (secs < 0) secs = 60;
       const m = String(Math.floor(secs/60)).padStart(2,'0');
       const s = String(secs%60).padStart(2,'0');
       if (tEl) tEl.textContent = `${m}:${s}`;
@@ -523,78 +648,27 @@ screens.push({
   render: () => {
     const r = state.responses;
     return `
-      <div class="reveal-banner">
-        <div style="font-size:32px; margin-bottom:8px;">🎭</div>
-        <h2>Você acabou de cair em vários Dark UX Patterns.</h2>
-        <p>Calma, ${r.nome ? r.nome.split(' ')[0] : 'amigo(a)'}: <strong>nada disso é real</strong>. Esta foi uma simulação para nossa apresentação de Ética em Computação.</p>
+      <div style="text-align:center; padding: 20px 0;">
+        <div style="font-size:64px; margin-bottom:16px;">✓</div>
+        <h1 style="margin-bottom:12px;">Cadastro concluído!</h1>
+        <p class="lead" style="margin-bottom:8px;">Bem-vindo(a) ao NebulaCloud Pro™, ${r.nome ? r.nome.split(' ')[0] : 'usuário'}.</p>
+        <p>Sua conta foi criada com sucesso e seu período de teste já começou.</p>
+        <p>Em breve você receberá um e-mail com as instruções de acesso à plataforma.</p>
       </div>
-      <h2>Veja o que você "aceitou":</h2>
-      <p>Compare suas respostas com as técnicas usadas em cada tela:</p>
-      <table class="summary-table">
-        <tr><td>Nome informado</td><td>${r.nome || '—'}</td></tr>
-        <tr><td>E-mail informado</td><td>${r.email || '—'}</td></tr>
-        <tr>
-          <td>Aceitou os termos<br><span class="pattern-cell">PRIVACY ZUCKERING</span></td>
-          <td>${r.aceitouTermos ? '✅ Aceitou' : '❌ Recusou'}<br><small>Os termos incluíam: ceder a alma, nomear primogênito, doar rim direito e publicar conversas privadas no Instagram.</small></td>
-        </tr>
-        <tr>
-          <td>Newsletter<br><span class="pattern-cell">CONFIRMSHAMING</span></td>
-          <td>${r.aceitouNewsletter ? '✅ Aceitou' : '❌ Recusou (corajoso)'}<br><small>O botão "não" tentava te envergonhar.</small></td>
-        </tr>
-        <tr>
-          <td>Preferências confusas<br><span class="pattern-cell">TRICK QUESTION</span></td>
-          <td>Não-ofertas: ${r.pref_naoOfertas ? 'sim' : 'não'} • Não-excluído: ${r.pref_naoExcluido ? 'sim' : 'não'} • Compartilhar com 47 parceiros: ${r.pref_compartilhar47 ? '✅ sim' : 'não'}<br><small>Dupla negação confunde o leitor. Os checkboxes vinham pré-marcados.</small></td>
-        </tr>
-        <tr>
-          <td>Plano<br><span class="pattern-cell">MISDIRECTION + SNEAK INTO BASKET</span></td>
-          <td>Plano: <strong>${r.planoEscolhido || '—'}</strong> • Backup: ${r.addon_backup ? '✅' : '❌'} • Antivírus: ${r.addon_antivirus ? '✅' : '❌'} • Seguro: ${r.addon_seguro ? '✅' : '❌'}<br><small>O "Pro" vinha pré-marcado. Adicionais já checados. Timer falso resetava sozinho.</small></td>
-        </tr>
-        <tr>
-          <td>Cartão de crédito<br><span class="pattern-cell">FORCED CONTINUITY</span></td>
-          <td>${r.forneceuCartao ? '✅ Forneceu (não foi salvo)' : '❌ Pulou'}<br><small>Cobrança automática após 7 dias. Cancelamento na madrugada.</small></td>
-        </tr>
-        <tr>
-          <td>Convidar amigos<br><span class="pattern-cell">FRIEND SPAM</span></td>
-          <td>${r.convidouAmigos ? `✅ Convidou` : '❌ Pulou'}<br><small>Spam em nome do usuário. Botão de pular ameaçava tirar bônus.</small></td>
-        </tr>
-      </table>
-      <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-top: 20px;">
-        <h3 style="font-family:var(--display); margin-bottom:8px;">📚 O que são Dark Patterns?</h3>
-        <p style="margin:0; font-size:14px;">
-          Termo cunhado por Harry Brignull em 2010, refere-se a interfaces projetadas para
-          <strong>enganar usuários</strong> e levá-los a tomar decisões que não tomariam se a interface
-          fosse honesta.
+      <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-top: 24px;">
+        <p style="margin:0; font-size:13px; text-align:center;">
+          Aguarde as próximas instruções do seu professor.
         </p>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="downloadJson()">⬇ Baixar minhas respostas (JSON)</button>
-      </div>
-      <div class="save-status ok" id="saveStatus">
-        ✓ Suas respostas foram registradas para análise da turma.
-      </div>
-      <p class="small-print" style="text-align:center;">
-        ID da sessão: <code>${state.sessionId}</code>
-      </p>
     `;
   },
   onMount: async () => {
-    const ok = await saveToSheets(true);
-    const el = document.getElementById('saveStatus');
-    if (el && !ok) {
-      el.className = 'save-status err';
-      el.innerHTML = '⚠ Salvamento online indisponível. Suas respostas estão salvas localmente.';
-    }
+    if (window.__globalTimer) { clearInterval(window.__globalTimer); window.__globalTimer = null; }
+    const bar = document.getElementById('globalTimerBar');
+    if (bar) bar.parentElement.style.display = 'none';
+    await saveToSheets(true);
   }
 });
-
-window.downloadJson = () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `respostas_${state.responses.nome || 'aluno'}.json`;
-  a.click();
-};
 
 function render() {
   const app = document.getElementById('app');
@@ -609,6 +683,7 @@ function render() {
 }
 
 function next() {
+  if (timerEnded) return;
   state.step++;
   persistLocal();
   saveToSheets(false);
@@ -618,6 +693,7 @@ function next() {
 }
 
 render();
+startGlobalTimer();
 </script>
 </body>
 </html>
