@@ -6,7 +6,7 @@
 <title>Relatório — Dark UX Patterns</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
 <script>
   // Mesma URL do Apps Script usada no index.html
@@ -15,60 +15,74 @@
 
 <style>
   :root {
-    --bg: #0e0d0b;
-    --bg-soft: #181613;
-    --bg-card: #1f1c18;
-    --border: #2d2925;
-    --ink: #f4ede0;
-    --muted: #8a8175;
-    --accent: #ff5722;
-    --accent-soft: rgba(255, 87, 34, 0.15);
-    --warn: #ffb547;
-    --good: #4ade80;
-    --display: 'Fraunces', Georgia, serif;
-    --body: 'Inter', -apple-system, sans-serif;
+    --bg: #f7f4ec;
+    --surface: #fffdf8;
+    --surface-strong: #fff5df;
+    --ink: #181410;
+    --muted: #5c554c;
+    --border: #d9cebd;
+    --accent: #d43d1f;
+    --accent-soft: #ffe0d4;
+    --blue: #1f6feb;
+    --blue-soft: #dce9ff;
+    --green: #16784c;
+    --green-soft: #dff4e8;
+    --purple: #7756c9;
+    --purple-soft: #ebe4ff;
+    --warn: #a96700;
+    --good: #157f3f;
+    --body: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --mono: 'JetBrains Mono', monospace;
+    --shadow: 0 10px 28px rgba(24, 20, 16, 0.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { overflow-x: hidden; }
   body {
     font-family: var(--body);
     background: var(--bg);
     color: var(--ink);
     min-height: 100vh;
-    line-height: 1.5;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     background-image:
-      radial-gradient(circle at 0% 0%, rgba(255, 87, 34, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(255, 87, 34, 0.04) 0%, transparent 50%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 244, 236, 0.96)),
+      radial-gradient(circle at 8% 10%, rgba(31, 111, 235, 0.13) 0%, transparent 34%),
+      radial-gradient(circle at 92% 18%, rgba(212, 61, 31, 0.12) 0%, transparent 32%);
   }
+  body { overflow-x: hidden; }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+  .container { width: 100%; max-width: 1360px; margin: 0 auto; padding: 32px 28px 48px; }
+  .hero-stats, .calls-grid, .visual-grid,
+  .hero-stat, .call-card, .bar-list, .plan-card { min-width: 0; width: 100%; max-width: 100%; }
 
   /* ===== HEADER ===== */
   header {
     display: flex; justify-content: space-between; align-items: flex-end;
-    margin-bottom: 48px; flex-wrap: wrap; gap: 16px;
-    border-bottom: 1px solid var(--border); padding-bottom: 24px;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 18px;
+    border-bottom: 3px solid var(--ink); padding-bottom: 20px;
   }
   .title-block { flex: 1; min-width: 280px; }
   .eyebrow {
-    font-family: var(--mono); font-size: 11px;
-    letter-spacing: 0.2em; text-transform: uppercase;
+    font-family: var(--mono); font-size: 13px;
+    letter-spacing: 0; text-transform: uppercase;
     color: var(--accent); margin-bottom: 8px;
+    font-weight: 700;
   }
   h1 {
-    font-family: var(--display); font-weight: 900;
-    font-size: clamp(36px, 5vw, 64px); line-height: 0.95;
-    letter-spacing: -0.03em;
+    font-family: var(--body); font-weight: 700;
+    font-size: clamp(42px, 5vw, 78px); line-height: 1.02;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
   }
-  h1 em { font-style: italic; color: var(--accent); }
-  .subtitle { color: var(--muted); font-size: 16px; margin-top: 8px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 22px; margin-top: 8px; }
 
   .live-pill {
     display: inline-flex; align-items: center; gap: 8px;
-    background: var(--bg-soft); border: 1px solid var(--border);
-    padding: 8px 14px; border-radius: 100px; font-size: 12px;
-    font-family: var(--mono); color: var(--muted);
+    background: var(--surface); border: 2px solid var(--ink);
+    padding: 10px 14px; border-radius: 8px; font-size: 14px;
+    font-family: var(--mono); color: var(--ink);
+    box-shadow: var(--shadow);
   }
   .live-dot {
     width: 8px; height: 8px; border-radius: 50%;
@@ -81,142 +95,207 @@
 
   /* ===== HERO STATS ===== */
   .hero-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px; margin-bottom: 48px;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px; margin-bottom: 28px;
   }
   .hero-stat {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 8px; padding: 22px; position: relative; overflow: hidden;
+    box-shadow: var(--shadow);
   }
+  .hero-stat.primary { background: var(--ink); border-color: var(--ink); color: white; }
+  .hero-stat.primary .hero-stat-label,
+  .hero-stat.primary .hero-stat-extra,
+  .hero-stat.primary .hero-stat-suffix { color: rgba(255,255,255,0.78); }
+  .hero-stat.accent { border-color: var(--accent); background: var(--surface-strong); }
+  .hero-stat.blue { border-color: var(--blue); background: var(--blue-soft); }
+  .hero-stat.green { border-color: var(--green); background: var(--green-soft); }
   .hero-stat-label {
-    font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 12px;
+    font-family: var(--mono); font-size: 13px;
+    letter-spacing: 0; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px;
+    font-weight: 700;
   }
   .hero-stat-value {
-    font-family: var(--display); font-weight: 900;
-    font-size: 56px; line-height: 1; letter-spacing: -0.04em;
+    font-family: var(--body); font-weight: 700;
+    font-size: clamp(52px, 5.4vw, 86px); line-height: 0.95; letter-spacing: 0;
     color: var(--ink);
+    overflow-wrap: anywhere;
   }
-  .hero-stat-suffix { font-size: 24px; color: var(--muted); }
+  .hero-stat.primary .hero-stat-value { color: white; }
+  .hero-stat-suffix { font-size: 32px; color: var(--muted); }
   .hero-stat-extra {
-    font-size: 13px; color: var(--muted); margin-top: 8px;
+    font-size: 17px; color: var(--muted); margin-top: 10px;
+  }
+  .hero-meter {
+    height: 12px; background: rgba(24,20,16,0.12); border-radius: 999px;
+    overflow: hidden; margin-top: 16px;
+  }
+  .hero-meter span {
+    display: block; height: 100%; background: currentColor; border-radius: inherit;
   }
 
   /* ===== CHAMADAS PRINCIPAIS (cartões grandes) ===== */
   .calls-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px; margin-bottom: 48px;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px; margin-bottom: 28px;
   }
   .call-card {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 32px; position: relative; overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 8px; padding: 24px; position: relative; overflow: hidden;
+    box-shadow: var(--shadow);
   }
-  .call-card:hover { transform: translateY(-2px); border-color: var(--accent); }
   .call-card.featured {
-    background: linear-gradient(135deg, #2a1a0e, #1f1612);
+    background: var(--accent-soft);
     border-color: var(--accent);
     grid-column: span 2;
   }
-  @media (max-width: 800px) { .call-card.featured { grid-column: span 1; } }
-
-  .call-emoji { font-size: 36px; margin-bottom: 16px; display: block; }
+  .call-card.blue { background: var(--blue-soft); border-color: var(--blue); }
+  .call-card.green { background: var(--green-soft); border-color: var(--green); }
+  .call-card.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .call-number {
+    font-family: var(--body); font-size: 72px; font-weight: 700;
+    line-height: 0.9; color: var(--accent); margin-bottom: 12px;
+  }
+  .call-card.blue .call-number { color: var(--blue); }
+  .call-card.green .call-number { color: var(--green); }
+  .call-card.purple .call-number { color: var(--purple); }
   .call-headline {
-    font-family: var(--display); font-weight: 800;
-    font-size: 26px; line-height: 1.15; letter-spacing: -0.02em;
+    font-family: var(--body); font-weight: 700;
+    font-size: 26px; line-height: 1.15; letter-spacing: 0;
     margin-bottom: 12px;
   }
   .call-card.featured .call-headline { font-size: 34px; }
-  .call-headline .num {
-    color: var(--accent); font-style: italic;
-  }
   .call-desc {
-    color: var(--muted); font-size: 14px; line-height: 1.5;
+    color: var(--muted); font-size: 18px; line-height: 1.4;
   }
   .pattern-tag {
     display: inline-block; font-family: var(--mono);
-    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--accent); background: var(--accent-soft);
-    padding: 4px 10px; border-radius: 4px; margin-top: 16px;
+    font-size: 12px; letter-spacing: 0; text-transform: uppercase;
+    color: var(--ink); background: rgba(255,255,255,0.72);
+    padding: 6px 10px; border-radius: 6px; margin-top: 18px;
+    border: 1px solid rgba(24,20,16,0.16); font-weight: 700;
   }
 
   /* ===== SEÇÕES ===== */
-  section { margin-bottom: 56px; }
+  section { margin-bottom: 34px; }
   .section-title {
-    font-family: var(--display); font-weight: 700;
-    font-size: 28px; letter-spacing: -0.02em;
-    margin-bottom: 24px; display: flex; align-items: baseline; gap: 12px;
+    font-family: var(--body); font-weight: 700;
+    font-size: 34px; letter-spacing: 0;
+    margin-bottom: 14px; display: flex; align-items: baseline; gap: 14px;
+    color: var(--ink);
   }
   .section-title small {
-    font-family: var(--mono); font-size: 11px;
+    font-family: var(--mono); font-size: 13px;
     color: var(--muted); font-weight: 400;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    letter-spacing: 0; text-transform: uppercase;
   }
 
   /* ===== TABELA DE CULPADOS ===== */
   .culprits-list {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 16px; overflow: hidden;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 8px; overflow: hidden; box-shadow: var(--shadow);
   }
   .culprit-row {
-    display: grid; grid-template-columns: 1fr auto;
-    padding: 16px 24px; border-bottom: 1px solid var(--border);
-    align-items: center; gap: 12px;
+    display: grid; grid-template-columns: 72px 1fr minmax(180px, 34%) 86px;
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+    align-items: center; gap: 16px;
   }
   .culprit-row:last-child { border-bottom: none; }
-  .culprit-name {
-    font-family: var(--display); font-size: 18px; font-weight: 600;
+  .culprit-rank {
+    width: 48px; height: 48px; border-radius: 8px; display: grid; place-items: center;
+    background: var(--ink); color: white; font-size: 24px; font-weight: 700;
   }
-  .culprit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .culprit-name {
+    font-family: var(--body); font-size: 24px; font-weight: 700;
+  }
+  .culprit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .culprit-tag {
-    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
-    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
-    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0;
+    text-transform: uppercase; padding: 4px 8px; border-radius: 6px;
+    background: var(--accent-soft); color: var(--ink); font-weight: 700;
+  }
+  .score-track {
+    height: 18px; border-radius: 999px; background: #eee4d6;
+    overflow: hidden; border: 1px solid var(--border);
+  }
+  .score-fill {
+    height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--warn));
   }
   .culprit-score {
-    font-family: var(--display); font-weight: 900;
-    font-size: 32px; color: var(--accent); line-height: 1;
+    font-family: var(--body); font-weight: 700;
+    font-size: 34px; color: var(--accent); line-height: 1; text-align: right;
   }
-  .culprit-score small { font-size: 12px; color: var(--muted); }
+  .culprit-score small { font-size: 16px; color: var(--muted); }
 
   /* ===== BARRAS HORIZONTAIS ===== */
   .bar-list {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 8px; padding: 20px; box-shadow: var(--shadow);
   }
-  .bar-item { margin-bottom: 18px; }
+  .bar-item { margin-bottom: 20px; }
   .bar-item:last-child { margin-bottom: 0; }
   .bar-header {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 6px; gap: 12px;
+    margin-bottom: 8px; gap: 14px;
   }
-  .bar-label { font-size: 14px; font-weight: 500; }
+  .bar-label { font-size: 21px; font-weight: 700; }
   .bar-label-pattern {
-    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    display: block;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0;
     color: var(--muted); text-transform: uppercase;
-    margin-left: 8px;
+    margin-top: 2px;
   }
   .bar-value {
-    font-family: var(--display); font-weight: 700; font-size: 18px;
+    font-family: var(--body); font-weight: 700; font-size: 26px;
     font-variant-numeric: tabular-nums; color: var(--accent);
   }
-  .bar-value small { color: var(--muted); font-size: 12px; font-weight: 400; }
+  .bar-value small { color: var(--muted); font-size: 16px; font-weight: 400; }
   .bar-track {
-    height: 10px; background: var(--bg); border-radius: 5px;
-    overflow: hidden;
+    height: 24px; background: #eee4d6; border-radius: 999px;
+    overflow: hidden; border: 1px solid var(--border);
   }
   .bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--accent), #ff8855);
-    border-radius: 5px; transition: width 1s ease;
+    border-radius: inherit; transition: width 1s ease;
+  }
+
+  .visual-grid {
+    display: grid; grid-template-columns: 1.25fr 0.75fr;
+    gap: 14px;
+  }
+  .plan-card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 8px; padding: 20px; box-shadow: var(--shadow);
+  }
+  .stacked-bar {
+    display: flex; height: 54px; border-radius: 8px; overflow: hidden;
+    border: 2px solid var(--ink); background: #eee4d6; margin: 14px 0;
+  }
+  .stacked-segment {
+    display: grid; place-items: center; min-width: 36px;
+    color: white; font-weight: 700; font-size: 18px;
+  }
+  .stacked-free { background: var(--green); }
+  .stacked-pro { background: var(--accent); }
+  .stacked-ultra { background: var(--purple); }
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted);
+    font-size: 17px; font-weight: 700;
+  }
+  .legend-dot {
+    display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+    margin-right: 6px; vertical-align: -1px;
   }
 
   /* ===== ESTADO VAZIO / LOADING ===== */
   .empty {
     text-align: center; padding: 80px 20px; color: var(--muted);
+    background: var(--surface); border: 2px solid var(--border); border-radius: 8px;
   }
-  .empty h3 { font-family: var(--display); font-size: 28px; color: var(--ink); margin-bottom: 8px; }
+  .empty h3 { font-family: var(--body); font-size: 34px; color: var(--ink); margin-bottom: 8px; }
+  .empty p { font-size: 20px; }
 
   .spinner {
     width: 32px; height: 32px;
@@ -230,29 +309,41 @@
 
   /* ===== CONTROLES ===== */
   .controls {
-    display: flex; gap: 8px; margin-bottom: 24px;
+    display: flex; gap: 10px; margin-bottom: 22px;
     flex-wrap: wrap; align-items: center;
   }
   .btn {
-    background: var(--bg-card); border: 1px solid var(--border);
-    color: var(--ink); padding: 10px 18px; border-radius: 8px;
-    font-family: var(--body); font-size: 13px; font-weight: 500;
+    background: var(--surface); border: 2px solid var(--border);
+    color: var(--ink); padding: 12px 18px; border-radius: 8px;
+    font-family: var(--body); font-size: 16px; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
   }
   .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  #lastUpdate { color: var(--muted); font-size: 16px; margin-left: auto; }
 
   .footer-note {
-    text-align: center; color: var(--muted); font-size: 12px;
-    font-family: var(--mono); margin-top: 60px; padding-top: 24px;
-    border-top: 1px solid var(--border);
+    text-align: center; color: var(--muted); font-size: 14px;
+    font-family: var(--mono); margin-top: 36px; padding-top: 22px;
+    border-top: 2px solid var(--border);
   }
 
+  @media (max-width: 1000px) {
+    .hero-stats, .calls-grid, .visual-grid { grid-template-columns: 1fr 1fr; }
+    .call-card.featured { grid-column: span 2; }
+    .culprit-row { grid-template-columns: 52px 1fr 82px; }
+    .score-track { display: none; }
+  }
   @media (max-width: 700px) {
-    .container { padding: 24px 16px; }
-    .hero-stat-value { font-size: 42px; }
-    .call-card { padding: 24px; }
-    .call-headline { font-size: 22px !important; }
+    .container { padding: 22px 14px; }
+    .hero-stats, .calls-grid, .visual-grid { grid-template-columns: 1fr; }
+    .call-card.featured { grid-column: span 1; }
+    .hero-stat-value { font-size: 50px; }
+    .call-number { font-size: 58px; }
+    .call-headline { font-size: 24px !important; }
+    .culprit-row { grid-template-columns: 48px 1fr; }
+    .culprit-score { grid-column: 2; text-align: left; }
+    #lastUpdate { margin-left: 0; width: 100%; }
   }
 </style>
 </head>
@@ -275,7 +366,7 @@
   <div class="controls">
     <button class="btn" onclick="reload()">↻ Atualizar agora</button>
     <button class="btn active" id="autoBtn" onclick="toggleAuto()">⏱ Auto-refresh: ON</button>
-    <span style="color: var(--muted); font-size: 12px; margin-left: auto;" id="lastUpdate">—</span>
+    <span id="lastUpdate">—</span>
   </div>
 
   <main id="content">
@@ -465,25 +556,28 @@ function render() {
   const html = `
     <!-- HERO STATS -->
     <div class="hero-stats">
-      <div class="hero-stat">
+      <div class="hero-stat primary">
         <div class="hero-stat-label">Total de respostas</div>
         <div class="hero-stat-value">${total}</div>
         <div class="hero-stat-extra">${m.timeout} não terminaram a tempo</div>
       </div>
-      <div class="hero-stat">
+      <div class="hero-stat accent">
         <div class="hero-stat-label">Aceitaram os termos</div>
         <div class="hero-stat-value">${pct(m.aceitouTermos, total)}<span class="hero-stat-suffix">%</span></div>
         <div class="hero-stat-extra">${m.aceitouTermos} de ${total} pessoas</div>
+        <div class="hero-meter" style="color: var(--accent);"><span style="width:${pct(m.aceitouTermos, total)}%"></span></div>
       </div>
-      <div class="hero-stat">
-        <div class="hero-stat-label">Deram o cartão</div>
+      <div class="hero-stat blue">
+        <div class="hero-stat-label">Cartão informado</div>
         <div class="hero-stat-value">${pct(m.cartao, total)}<span class="hero-stat-suffix">%</span></div>
-        <div class="hero-stat-extra">${m.cartao} pessoas confiaram demais</div>
+        <div class="hero-stat-extra">${m.cartao} pessoa(s) confiaram demais</div>
+        <div class="hero-meter" style="color: var(--blue);"><span style="width:${pct(m.cartao, total)}%"></span></div>
       </div>
-      <div class="hero-stat">
-        <div class="hero-stat-label">Caíram em pelo menos 5</div>
+      <div class="hero-stat green">
+        <div class="hero-stat-label">Caíram em 5 ou mais</div>
         <div class="hero-stat-value">${scored.filter(s => s.score >= 5).length}</div>
         <div class="hero-stat-extra">vítimas múltiplas</div>
+        <div class="hero-meter" style="color: var(--green);"><span style="width:${pct(scored.filter(s => s.score >= 5).length, total)}%"></span></div>
       </div>
     </div>
 
@@ -491,9 +585,9 @@ function render() {
     <section>
       <div class="calls-grid">
         <div class="call-card featured">
-          <span class="call-emoji">😈</span>
+          <div class="call-number">${m.aceitouTermos}</div>
           <div class="call-headline">
-            <span class="num">${m.aceitouTermos}</span> ${m.aceitouTermos === 1 ? 'pessoa vendeu' : 'pessoas venderam'} a alma pro diabo
+            ${m.aceitouTermos === 1 ? 'pessoa vendeu' : 'pessoas venderam'} a alma no contrato
           </div>
           <div class="call-desc">
             Aceitaram termos com cláusulas de cessão de alma, nomeação do primogênito por R$ 3,50, doação do rim direito como garantia de pagamento e publicação de conversas privadas no Instagram.
@@ -501,10 +595,10 @@ function render() {
           <span class="pattern-tag">Privacy Zuckering</span>
         </div>
 
-        <div class="call-card">
-          <span class="call-emoji">💳</span>
+        <div class="call-card blue">
+          <div class="call-number">${m.cartao}</div>
           <div class="call-headline">
-            <span class="num">${m.cartao}</span> ${m.cartao === 1 ? 'aluno digitou' : 'alunos digitaram'} dados de cartão
+            ${m.cartao === 1 ? 'aluno digitou' : 'alunos digitaram'} dados de cartão
           </div>
           <div class="call-desc">
             Aceitaram cobrança automática mensal de R$ 49 + adicionais. Cancelamento exigia ligar entre 3h e 4h da manhã.
@@ -512,10 +606,10 @@ function render() {
           <span class="pattern-tag">Forced Continuity</span>
         </div>
 
-        <div class="call-card">
-          <span class="call-emoji">🛒</span>
+        <div class="call-card green">
+          <div class="call-number">${todosAddons}</div>
           <div class="call-headline">
-            <span class="num">${todosAddons}</span> ${todosAddons === 1 ? 'levou' : 'levaram'} todos os 3 adicionais sem perceber
+            ${todosAddons === 1 ? 'levou' : 'levaram'} os 3 adicionais
           </div>
           <div class="call-desc">
             Backup (R$19) + Antivírus (R$14) + Seguro (R$9) já vinham marcados. Total: R$ 42 a mais por mês.
@@ -523,10 +617,10 @@ function render() {
           <span class="pattern-tag">Sneak into Basket</span>
         </div>
 
-        <div class="call-card">
-          <span class="call-emoji">📤</span>
+        <div class="call-card purple">
+          <div class="call-number">${m.compartilhar47}</div>
           <div class="call-headline">
-            <span class="num">${m.compartilhar47}</span> ${m.compartilhar47 === 1 ? 'autorizou' : 'autorizaram'} compartilhar dados com 47 parceiros
+            ${m.compartilhar47 === 1 ? 'autorizou' : 'autorizaram'} 47 parceiros
           </div>
           <div class="call-desc">
             Caíram na pergunta com dupla negação e checkboxes pré-marcados.
@@ -535,9 +629,9 @@ function render() {
         </div>
 
         <div class="call-card">
-          <span class="call-emoji">📨</span>
+          <div class="call-number">${m.convidouAmigos}</div>
           <div class="call-headline">
-            <span class="num">${m.convidouAmigos}</span> ${m.convidouAmigos === 1 ? 'aluno expôs amigos' : 'alunos expuseram amigos'} ao spam
+            ${m.convidouAmigos === 1 ? 'aluno expôs amigos' : 'alunos expuseram amigos'} ao spam
           </div>
           <div class="call-desc">
             Forneceram e-mails de outras pessoas pra receberem convites em seu nome.
@@ -545,10 +639,10 @@ function render() {
           <span class="pattern-tag">Friend Spam</span>
         </div>
 
-        <div class="call-card">
-          <span class="call-emoji">😅</span>
+        <div class="call-card blue">
+          <div class="call-number">${m.newsletter}</div>
           <div class="call-headline">
-            <span class="num">${m.newsletter}</span> ${m.newsletter === 1 ? 'caiu' : 'caíram'} no constrangimento
+            ${m.newsletter === 1 ? 'caiu' : 'caíram'} no botão constrangedor
           </div>
           <div class="call-desc">
             Aceitaram a newsletter porque o botão "não" dizia que a pessoa preferia "continuar perdendo tempo e não evoluir profissionalmente".
@@ -566,12 +660,14 @@ function render() {
       <div class="culprits-list">
         ${top5.map((s, i) => `
           <div class="culprit-row">
+            <div class="culprit-rank">${i + 1}</div>
             <div>
-              <div class="culprit-name">${i + 1}. ${escapeHtml(s.nome)}</div>
+              <div class="culprit-name">${escapeHtml(s.nome)}</div>
               <div class="culprit-tags">
-                ${s.tags.map(t => `<span class="culprit-tag">${escapeHtml(t)}</span>`).join('')}
+                ${s.tags.length ? s.tags.map(t => `<span class="culprit-tag">${escapeHtml(t)}</span>`).join('') : '<span class="culprit-tag">sem armadilhas</span>'}
               </div>
             </div>
+            <div class="score-track"><div class="score-fill" style="width:${pct(s.score, 8)}%"></div></div>
             <div class="culprit-score">${s.score}<small>/8</small></div>
           </div>
         `).join('')}
@@ -600,10 +696,24 @@ function render() {
       <div class="section-title">
         Plano escolhido <small>misdirection — o "Pro" vinha pré-selecionado</small>
       </div>
-      <div class="bar-list">
-        ${barRow('Básico (gratuito) — escolha consciente', m.planoFree, total)}
-        ${barRow('Pro (R$49/mês) — pré-selecionado', m.planoPro, total)}
-        ${barRow('Ultra (R$149/mês)', m.planoUltra, total)}
+      <div class="visual-grid">
+        <div class="plan-card">
+          <div class="stacked-bar">
+            ${stackSegment('free', m.planoFree, total)}
+            ${stackSegment('pro', m.planoPro, total)}
+            ${stackSegment('ultra', m.planoUltra, total)}
+          </div>
+          <div class="legend">
+            <span><span class="legend-dot stacked-free"></span>Básico: ${m.planoFree}</span>
+            <span><span class="legend-dot stacked-pro"></span>Pro: ${m.planoPro}</span>
+            <span><span class="legend-dot stacked-ultra"></span>Ultra: ${m.planoUltra}</span>
+          </div>
+        </div>
+        <div class="bar-list">
+          ${barRow('Básico gratuito', m.planoFree, total)}
+          ${barRow('Pro pré-selecionado', m.planoPro, total)}
+          ${barRow('Ultra', m.planoUltra, total)}
+        </div>
       </div>
     </section>
   `;
@@ -627,6 +737,12 @@ function barRow(label, value, total, pattern) {
       </div>
     </div>
   `;
+}
+
+function stackSegment(kind, value, total) {
+  const p = pct(value, total);
+  if (!value) return '';
+  return `<div class="stacked-segment stacked-${kind}" style="width:${p}%">${p}%</div>`;
 }
 
 function escapeHtml(s) {
