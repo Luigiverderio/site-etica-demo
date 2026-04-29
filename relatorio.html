@@ -306,11 +306,39 @@ function asBool(v) {
   return false;
 }
 
+function buildSheetsUrl(params = {}) {
+  const url = new URL(window.SHEETS_URL);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
+
+function normalizeData(data) {
+  if (Array.isArray(data)) {
+    return { ok: true, total: data.length, respostas: data };
+  }
+  if (data && Array.isArray(data.respostas)) return data;
+  if (data && Array.isArray(data.data)) {
+    return { ...data, ok: data.ok !== false, total: data.total ?? data.data.length, respostas: data.data };
+  }
+  if (data && Array.isArray(data.records)) {
+    return { ...data, ok: data.ok !== false, total: data.total ?? data.records.length, respostas: data.records };
+  }
+  return data;
+}
+
+async function fetchJsonData() {
+  const response = await fetch(buildSheetsUrl({ t: Date.now() }), { cache: 'no-store' });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
 /**
- * Busca os dados via JSONP — contorna CORS de forma simples.
+ * Fallback via JSONP caso o navegador bloqueie fetch/CORS.
  * Apps Script aceita ?callback=xxx e devolve `xxx({...})` como JS.
  */
-function fetchData() {
+function fetchJsonpData() {
   return new Promise((resolve, reject) => {
     const cbName = '__darkux_cb_' + Date.now();
     const script = document.createElement('script');
@@ -328,15 +356,25 @@ function fetchData() {
       resolve(data);
     };
     script.onerror = () => { cleanup(); reject(new Error('script error')); };
-    script.src = window.SHEETS_URL + '?callback=' + cbName + '&t=' + Date.now();
+    script.src = buildSheetsUrl({ callback: cbName, t: Date.now() });
     document.body.appendChild(script);
   });
+}
+
+async function fetchData() {
+  try {
+    return await fetchJsonData();
+  } catch (fetchError) {
+    console.warn('Fetch JSON falhou; tentando JSONP:', fetchError);
+    return fetchJsonpData();
+  }
 }
 
 async function reload() {
   document.getElementById('liveStatus').textContent = 'Atualizando...';
   try {
-    const data = await fetchData();
+    const data = normalizeData(await fetchData());
+    window.__lastDashboardData = data;
     if (data && data.ok && Array.isArray(data.respostas)) {
       respostas = data.respostas;
       render();
@@ -351,7 +389,7 @@ async function reload() {
     document.getElementById('content').innerHTML = `
       <div class="empty">
         <h3>Não consegui carregar os dados</h3>
-        <p>Verifique se o Apps Script foi reimplantado depois das mudanças do GET. ${e.message}</p>
+        <p>Verifique se o Apps Script foi reimplantado depois das mudanças do GET. ${escapeHtml(e.message)}</p>
       </div>
     `;
   }
