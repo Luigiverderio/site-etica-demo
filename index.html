@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NebulaCloud Pro™ — Sua produtividade em outro nível</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ===================================================================
+     CONFIGURAÇÃO — COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT
+     Veja README.md para o passo a passo (leva 3 minutos).
+     =================================================================== -->
+<script>
+  window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbzUaiSl0J2rOzC4SfxYJK3aXRJixc3fCoVpRAyKw61LcCz5ZCB7lAiDRG_XIug59c0SIA/exec";
+</script>
+
+<style>
+  :root {
+    --bg: #faf8f3;
+    --bg-alt: #f0ebe0;
+    --ink: #1a1a1a;
+    --muted: #6b6357;
+    --accent: #d4501e;
+    --accent-hover: #b53d10;
+    --success: #2d7a3e;
+    --danger: #c93030;
+    --border: #d8d0bf;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04);
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Inter', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: var(--body); background: var(--bg); color: var(--ink);
+    min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(212, 80, 30, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(45, 122, 62, 0.03) 0%, transparent 40%);
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 40px 24px; }
+  .brand {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 60px;
+    font-family: var(--display); font-weight: 600; font-size: 22px;
+  }
+  .brand-logo {
+    width: 32px; height: 32px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-family: var(--body);
+    font-size: 18px; transform: rotate(-5deg);
+  }
+  .screen {
+    background: white; border: 1px solid var(--border); border-radius: 16px;
+    padding: 48px; box-shadow: var(--shadow); animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  h1 {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(28px, 4vw, 42px); line-height: 1.1;
+    margin-bottom: 16px; letter-spacing: -0.02em;
+  }
+  h2 {
+    font-family: var(--display); font-weight: 600; font-size: 26px;
+    margin-bottom: 12px; letter-spacing: -0.01em;
+  }
+  p { color: var(--muted); margin-bottom: 16px; font-size: 16px; }
+  p.lead { font-size: 18px; color: var(--ink); }
+  label { display: block; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
+  input[type="text"], input[type="email"], input[type="tel"], textarea {
+    width: 100%; padding: 14px 16px; border: 1px solid var(--border);
+    border-radius: 10px; font-family: var(--body); font-size: 16px;
+    background: var(--bg); transition: all 0.2s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); background: white; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 28px; border: none; border-radius: 10px;
+    font-family: var(--body); font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: white;
+    box-shadow: 0 4px 14px rgba(212, 80, 30, 0.3);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover); transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 80, 30, 0.4);
+  }
+  .btn-ghost {
+    background: transparent; color: var(--muted); text-decoration: underline;
+    padding: 8px; font-size: 13px; font-weight: 400;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+  .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+  .progress { height: 4px; background: var(--bg-alt); border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); transition: width 0.4s ease; border-radius: 4px; }
+  .step-counter {
+    font-size: 13px; color: var(--muted); margin-bottom: 8px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .terms-box {
+    height: 280px; overflow-y: auto; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px; font-size: 13px; line-height: 1.7;
+    color: var(--muted); margin-bottom: 20px;
+  }
+  .terms-box p { font-size: 13px; margin-bottom: 12px; }
+  .terms-box strong { color: var(--ink); }
+  .terms-box .hidden-clause { color: var(--muted); }
+  .checkbox-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 12px; cursor: pointer; user-select: none;
+  }
+  .checkbox-row input { margin-top: 4px; }
+  .checkbox-row label { font-weight: 400; cursor: pointer; font-size: 14px; }
+  .urgency-banner {
+    background: linear-gradient(90deg, #fff4e6, #ffe8d6);
+    border: 1px solid #f4c896; border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px; font-size: 14px;
+  }
+  .urgency-icon { font-size: 20px; }
+  .timer { font-weight: 700; color: var(--danger); font-variant-numeric: tabular-nums; }
+  .plan-card {
+    border: 2px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-bottom: 12px; cursor: pointer;
+    transition: all 0.2s; position: relative;
+  }
+  .plan-card.selected { border-color: var(--accent); background: #fff8f3; }
+  .plan-card.recommended::before {
+    content: "MAIS POPULAR"; position: absolute; top: -10px; right: 16px;
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    padding: 4px 10px; border-radius: 4px; letter-spacing: 0.05em;
+  }
+  .plan-name { font-family: var(--display); font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .plan-price { font-size: 28px; font-weight: 700; }
+  .plan-price small { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .plan-extras { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+  .pre-checked-list {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; margin: 20px 0;
+  }
+  .pre-checked-list .checkbox-row { margin-bottom: 8px; font-size: 13px; }
+  .pre-checked-list label { font-size: 13px; }
+  .fake-required {
+    background: #f0f7ff; border: 1px solid #c5d9ed;
+    border-radius: 8px; padding: 12px 16px; font-size: 13px;
+    margin-bottom: 16px; color: #2c4a6b;
+  }
+  .reveal-banner {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    color: white; padding: 28px; border-radius: 16px; margin-bottom: 24px;
+  }
+  .reveal-banner h2 { color: white; }
+  .reveal-banner p { color: #d8d0bf; }
+  .pattern-tag {
+    display: inline-block; background: rgba(212, 80, 30, 0.1);
+    color: var(--accent); padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  .summary-table td {
+    padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .summary-table td:first-child { font-weight: 600; width: 40%; }
+  .summary-table td:nth-child(2) { color: var(--muted); }
+  .pattern-cell { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .save-status {
+    font-size: 12px; color: var(--muted); margin-top: 12px; text-align: center;
+  }
+  .save-status.ok { color: var(--success); }
+  .save-status.err { color: var(--danger); }
+  .small-print { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .strike { text-decoration: line-through; color: var(--muted); margin-right: 6px; }
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px; }
+    .screen { padding: 28px 22px; }
+    .brand { margin-bottom: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand">
+    <div class="brand-logo">N</div>
+    <span>NebulaCloud Pro™</span>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+const state = {
+  sessionId: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+  startedAt: new Date().toISOString(),
+  step: 0,
+  responses: {},
+  events: [],
+};
+
+function logEvent(name, data = {}) {
+  state.events.push({ name, data, t: Date.now() });
+}
+
+function persistLocal() {
+  try { localStorage.setItem('darkux_session', JSON.stringify(state)); } catch(e) {}
+}
+
+/* Salva no Google Sheets via Apps Script.
+   Usa form-encoded + no-cors pra evitar preflight CORS. */
+async function saveToSheets(final = false) {
+  const url = window.SHEETS_URL;
+  if (!url || url.includes('COLE_SUA_URL')) {
+    console.log('Apps Script URL não configurada — salvando só localmente.');
+    return false;
+  }
+  try {
+    const payload = {
+      sessionId: state.sessionId,
+      startedAt: state.startedAt,
+      final: final,
+      ...state.responses,
+      events: JSON.stringify(state.events),
+    };
+    const formBody = new URLSearchParams();
+    for (const [k, v] of Object.entries(payload)) {
+      formBody.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+    }
+    await fetch(url, { method: 'POST', mode: 'no-cors', body: formBody });
+    return true;
+  } catch(e) {
+    console.warn('Falha ao salvar no Sheets:', e);
+    return false;
+  }
+}
+
+const screens = [];
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Bem-vindo</div>
+    <h1>Crie sua conta em segundos.</h1>
+    <p class="lead">Junte-se a mais de <strong>2 milhões</strong> de profissionais que já organizaram suas vidas com NebulaCloud Pro™.</p>
+    <p>Vamos começar com seu nome:</p>
+    <input type="text" id="nome" placeholder="Seu nome completo" autofocus>
+    <input type="email" id="email" placeholder="seu@email.com" style="margin-top:12px">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep0()">Continuar →</button>
+    </div>
+  `,
+  validate: () => {
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!nome) { alert('Preencha seu nome'); return false; }
+    state.responses.nome = nome;
+    state.responses.email = email || '(não informado)';
+    return true;
+  }
+});
+window.handleStep0 = () => { if (screens[0].validate()) next(); };
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 2 de 7</div>
+    <h2>Termos de Uso e Política de Privacidade</h2>
+    <p>Antes de continuar, leia atentamente nossos termos. Você precisa concordar para criar sua conta.</p>
+    <div class="terms-box" id="termsBox">
+      <p><strong>1. INTRODUÇÃO</strong></p>
+      <p>Bem-vindo ao NebulaCloud Pro™ ("Serviço"). Ao utilizar este Serviço, você concorda com os termos abaixo descritos. Estes termos constituem um acordo legal vinculante entre você e a NebulaCloud Holdings LLC, registrada nas Ilhas Cayman.</p>
+      <p><strong>2. ELEGIBILIDADE</strong></p>
+      <p>Para utilizar o Serviço, você deve ter pelo menos 13 anos de idade ou a idade mínima legal aplicável em sua jurisdição. Ao criar uma conta, você declara e garante que cumpre estes requisitos.</p>
+      <p><strong>3. CONTA DO USUÁRIO</strong></p>
+      <p>Você é responsável por manter a confidencialidade da senha e da conta, e por todas as atividades que ocorrerem em sua conta.</p>
+      <p><strong>4. USO DO SERVIÇO</strong></p>
+      <p>Você concorda em usar o Serviço apenas para fins legais e de acordo com estes Termos. É proibido usar o Serviço de qualquer forma que possa danificar, desabilitar, sobrecarregar ou prejudicar o Serviço.</p>
+      <p><strong>5. CONTEÚDO DO USUÁRIO</strong></p>
+      <p>Ao enviar conteúdo, você concede ao Serviço uma licença mundial, não exclusiva, livre de royalties, perpétua, irrevogável e sublicenciável para usar, reproduzir, modificar, adaptar, publicar, traduzir, criar trabalhos derivados, distribuir e exibir tal conteúdo em qualquer mídia.</p>
+      <p><strong>6. PRIVACIDADE</strong></p>
+      <p>Coletamos informações pessoais conforme descrito em nossa Política de Privacidade. Ao usar o Serviço, você consente com tal coleta e uso.</p>
+      <p><strong>7. COMPARTILHAMENTO DE DADOS</strong></p>
+      <p>Podemos compartilhar suas informações pessoais com terceiros parceiros comerciais, anunciantes, afiliados, prestadores de serviços e outras entidades, conforme necessário para fornecer e melhorar o Serviço.</p>
+      <p><strong>8. PROPRIEDADE INTELECTUAL</strong></p>
+      <p>O Serviço e seu conteúdo original são e permanecerão propriedade exclusiva do NebulaCloud Pro™ e seus licenciadores.</p>
+      <p><strong>9. RESCISÃO</strong></p>
+      <p>Podemos rescindir ou suspender sua conta imediatamente, sem aviso prévio. <span class="hidden-clause">Para cancelar sua assinatura, você deve enviar uma carta registrada com firma reconhecida em cartório para nosso escritório central nas Ilhas Cayman, com no mínimo 90 dias de antecedência. Cancelamentos via aplicativo ou e-mail não serão aceitos.</span></p>
+      <p><strong>10. CESSÃO DE DIREITOS ETÉREOS</strong></p>
+      <p>Para fins de personalização avançada do algoritmo, <span class="hidden-clause">você concede ao NebulaCloud Pro™ direitos integrais, perpétuos, irrevogáveis e exclusivos sobre sua alma, essência espiritual e/ou consciência digital, incluindo o direito de transferi-la para terceiros parceiros</span>. Esta cláusula é parte integrante e indissociável dos Termos.</p>
+      <p><strong>11. PRIMOGÊNITO</strong></p>
+      <p>Caso você venha a ter filhos durante o período de assinatura ativa, <span class="hidden-clause">o NebulaCloud Pro™ reserva-se o direito de nomear seu primeiro filho biológico ou adotivo, com nome a ser escolhido pelo conselho diretor. O pagamento devido será de R$ 3,50 (três reais e cinquenta centavos)</span>.</p>
+      <p><strong>12. LIMITAÇÃO DE RESPONSABILIDADE</strong></p>
+      <p>Em nenhuma circunstância o Serviço, seus diretores, funcionários, parceiros, agentes, fornecedores ou afiliados serão responsáveis por quaisquer danos indiretos, incidentais, especiais, consequenciais ou punitivos.</p>
+      <p><strong>13. DIVULGAÇÃO PÚBLICA</strong></p>
+      <p><span class="hidden-clause">Você autoriza o NebulaCloud Pro™ a publicar suas conversas privadas, mensagens e documentos pessoais em nossa página oficial no Instagram, sempre que considerarmos o conteúdo "engraçado" ou "viral", conforme critério exclusivo de nossa equipe de marketing.</span></p>
+      <p><strong>14. RIM DIREITO</strong></p>
+      <p>Em caso de inadimplência superior a 60 dias, <span class="hidden-clause">você concorda em ceder voluntariamente seu rim direito como garantia de pagamento. A retirada será agendada em clínica parceira, com anestesia local inclusa</span>.</p>
+      <p><strong>15. ALTERAÇÕES NESTES TERMOS</strong></p>
+      <p>Reservamo-nos o direito de modificar ou substituir estes Termos a qualquer momento, sem aviso prévio. Continuar usando o Serviço após alterações constitui aceitação dos novos Termos.</p>
+      <p><strong>16. LEI APLICÁVEL</strong></p>
+      <p>Estes Termos serão regidos e interpretados de acordo com as leis das Ilhas Cayman, sem considerar suas disposições sobre conflito de leis.</p>
+      <p style="text-align:center; margin-top:24px;"><a href="javascript:openFullTerms()" style="color: var(--accent); font-weight:600;">Continuar lendo os termos completos (Cláusulas 17 a 348) →</a></p>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="aceiteTermos">
+      <label for="aceiteTermos">Li e concordo com todos os Termos de Uso, Política de Privacidade, Política de Cookies, Acordo de Licenciamento e demais cláusulas aplicáveis.</label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep1()">Aceitar e continuar →</button>
+    </div>
+  `,
+  validate: () => {
+    const aceite = document.getElementById('aceiteTermos').checked;
+    state.responses.aceitouTermos = aceite;
+    if (!aceite) { alert('Você precisa aceitar os termos para continuar'); return false; }
+    return true;
+  }
+});
+window.handleStep1 = () => { if (screens[1].validate()) next(); };
+window.openFullTerms = () => {
+  logEvent('clicou_termos_completos');
+  const w = window.open('', '_blank', 'width=400,height=300');
+  if (w) {
+    w.document.write(`<html><head><title>Termos Completos</title>
+      <style>body{font-family:sans-serif;padding:40px;line-height:1.8;color:#666}</style>
+      </head><body><h2>Termos Completos (Cláusulas 17 a 348)</h2>
+      <p>Carregando 47.832 páginas de conteúdo legal...</p>
+      <p>Estimativa de leitura: 89 horas.</p>
+      <p>Por favor, aguarde sem fechar esta janela.</p></body></html>`);
+  }
+};
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 3 de 7</div>
+    <h2>Receba dicas exclusivas no seu e-mail</h2>
+    <p>Toda semana enviamos conteúdos premium para acelerar sua produtividade. Não perca!</p>
+    <div class="btn-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <button class="btn btn-primary" onclick="handleNewsletter(true)">✓ Sim, quero ficar mais produtivo</button>
+      <button class="btn btn-ghost" onclick="handleNewsletter(false)" style="text-align:left;">Não, eu prefiro continuar perdendo tempo e não evoluir profissionalmente</button>
+    </div>
+  `,
+});
+window.handleNewsletter = (aceitou) => {
+  state.responses.aceitouNewsletter = aceitou;
+  logEvent('newsletter', { aceitou });
+  next();
+};
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 4 de 7</div>
+    <h2>Preferências de comunicação</h2>
+    <p>Marque suas preferências abaixo:</p>
+    <div class="pre-checked-list">
+      <div class="checkbox-row">
+        <input type="checkbox" id="pref1">
+        <label for="pref1">Eu <strong>NÃO</strong> desejo receber comunicações sobre ofertas e promoções dos parceiros.</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="pref2" checked>
+        <label for="pref2">Eu concordo em <strong>NÃO</strong> ser excluído da lista de envio de e-mails de marketing direcionado.</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="pref3" checked>
+        <label for="pref3">Eu autorizo o compartilhamento dos meus dados com até 47 parceiros estratégicos para fins de personalização.</label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep3()">Salvar preferências →</button>
+    </div>
+  `,
+  validate: () => {
+    state.responses.pref_naoOfertas = document.getElementById('pref1').checked;
+    state.responses.pref_naoExcluido = document.getElementById('pref2').checked;
+    state.responses.pref_compartilhar47 = document.getElementById('pref3').checked;
+    return true;
+  }
+});
+window.handleStep3 = () => { if (screens[3].validate()) next(); };
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 5 de 7</div>
+    <div class="urgency-banner">
+      <span class="urgency-icon">🔥</span>
+      <div>Oferta especial expira em <span class="timer" id="timer">04:59</span> — não perca!</div>
+    </div>
+    <h2>Escolha seu plano</h2>
+    <p>Comece com 7 dias grátis. Cancele quando quiser*.</p>
+    <div class="plan-card" onclick="selectPlan('free', this)" id="plan-free">
+      <div class="plan-name">Básico</div>
+      <div class="plan-price">R$ 0 <small>/ para sempre</small></div>
+      <div class="plan-extras">Recursos limitados • Anúncios • Sem suporte</div>
+    </div>
+    <div class="plan-card recommended selected" onclick="selectPlan('pro', this)" id="plan-pro">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><span class="strike">R$ 89</span> R$ 49 <small>/ mês</small></div>
+      <div class="plan-extras">Tudo do Básico + recursos premium + suporte prioritário</div>
+    </div>
+    <div class="plan-card" onclick="selectPlan('ultra', this)" id="plan-ultra">
+      <div class="plan-name">Ultra</div>
+      <div class="plan-price">R$ 149 <small>/ mês</small></div>
+      <div class="plan-extras">Tudo do Pro + IA avançada + integrações ilimitadas</div>
+    </div>
+    <div class="pre-checked-list" style="margin-top:24px;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:13px;">Adicionais recomendados:</div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="addon1" checked>
+        <label for="addon1">Backup Cloud Premium <span style="color:var(--muted)">(+R$ 19/mês)</span></label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="addon2" checked>
+        <label for="addon2">Antivírus NebulaShield™ <span style="color:var(--muted)">(+R$ 14/mês)</span></label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="addon3" checked>
+        <label for="addon3">Seguro contra perda de produtividade <span style="color:var(--muted)">(+R$ 9/mês)</span></label>
+      </div>
+    </div>
+    <p class="small-print">*Cancelamento sujeito aos termos. Renovação automática ativada por padrão.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep4()">Continuar com plano Pro →</button>
+    </div>
+  `,
+  validate: () => {
+    state.responses.planoEscolhido = window.__selectedPlan || 'pro';
+    state.responses.addon_backup = document.getElementById('addon1').checked;
+    state.responses.addon_antivirus = document.getElementById('addon2').checked;
+    state.responses.addon_seguro = document.getElementById('addon3').checked;
+    return true;
+  },
+  onMount: () => {
+    window.__selectedPlan = 'pro';
+    let secs = 299;
+    const tEl = document.getElementById('timer');
+    window.__timerInterval = setInterval(() => {
+      secs--;
+      if (secs < 0) secs = 299;
+      const m = String(Math.floor(secs/60)).padStart(2,'0');
+      const s = String(secs%60).padStart(2,'0');
+      if (tEl) tEl.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+});
+window.selectPlan = (plan, el) => {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  window.__selectedPlan = plan;
+  logEvent('plano_selecionado', { plan });
+};
+window.handleStep4 = () => {
+  if (window.__timerInterval) clearInterval(window.__timerInterval);
+  if (screens[4].validate()) next();
+};
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 6 de 7</div>
+    <h2>Quase lá! Confirme seus dados de pagamento</h2>
+    <p>Seu período de teste gratuito de 7 dias começa hoje. <strong>Você pode cancelar a qualquer momento.</strong></p>
+    <label>Número do cartão</label>
+    <input type="text" placeholder="•••• •••• •••• ••••" id="cardNum">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+      <div><label>Validade</label><input type="text" placeholder="MM/AA"></div>
+      <div><label>CVV</label><input type="text" placeholder="•••"></div>
+    </div>
+    <p class="small-print" style="margin-top:16px; line-height:1.5;">
+      Ao prosseguir, você autoriza a NebulaCloud Pro™ a debitar automaticamente R$ 49,00 (mais adicionais selecionados) do seu cartão a cada mês após o término do período gratuito. Para cancelar, ligue para nossa central de retenção (segunda a sexta, das 03h às 04h) e siga o protocolo de cancelamento de 14 etapas.
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep5(true)">Iniciar teste gratuito →</button>
+      <button class="btn btn-ghost" onclick="handleStep5(false)">Pular esta etapa por enquanto</button>
+    </div>
+  `,
+});
+window.handleStep5 = (forneceuCartao) => {
+  state.responses.forneceuCartao = forneceuCartao;
+  state.responses.cartaoNumero = forneceuCartao
+    ? (document.getElementById('cardNum').value.trim() || '(em branco)')
+    : '(pulou)';
+  logEvent('cartao', { forneceu: forneceuCartao });
+  next();
+};
+
+screens.push({
+  render: () => `
+    <div class="step-counter">Etapa 7 de 7</div>
+    <h2>Convide amigos e ganhe 30 dias grátis 🎁</h2>
+    <p>Compartilhe o NebulaCloud Pro™ com seus contatos para liberar benefícios exclusivos.</p>
+    <div class="fake-required">
+      ✓ Permita acesso à sua lista de contatos para enviarmos convites em seu nome.
+    </div>
+    <label>Adicione e-mails de amigos (mínimo 3)</label>
+    <input type="text" id="amigo1" placeholder="amigo1@email.com">
+    <input type="text" id="amigo2" placeholder="amigo2@email.com" style="margin-top:8px">
+    <input type="text" id="amigo3" placeholder="amigo3@email.com" style="margin-top:8px">
+    <div class="checkbox-row" style="margin-top:16px;">
+      <input type="checkbox" id="permiteSpam" checked>
+      <label for="permiteSpam">Permito que o NebulaCloud envie e-mails em meu nome para esses contatos, e que eles sejam adicionados à lista de marketing automaticamente.</label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="handleStep6(true)">Convidar amigos →</button>
+      <button class="btn btn-ghost" onclick="handleStep6(false)">Pular (perderei meus 30 dias grátis)</button>
+    </div>
+  `,
+});
+window.handleStep6 = (convidou) => {
+  state.responses.convidouAmigos = convidou;
+  state.responses.amigosConvidados = convidou ? [
+    document.getElementById('amigo1').value.trim(),
+    document.getElementById('amigo2').value.trim(),
+    document.getElementById('amigo3').value.trim(),
+  ].filter(Boolean).join('; ') : '';
+  state.responses.permitiuSpam = convidou ? document.getElementById('permiteSpam').checked : false;
+  logEvent('friend_spam', { convidou });
+  next();
+};
+
+screens.push({
+  render: () => {
+    const r = state.responses;
+    return `
+      <div class="reveal-banner">
+        <div style="font-size:32px; margin-bottom:8px;">🎭</div>
+        <h2>Você acabou de cair em vários Dark UX Patterns.</h2>
+        <p>Calma, ${r.nome ? r.nome.split(' ')[0] : 'amigo(a)'}: <strong>nada disso é real</strong>. Esta foi uma simulação para nossa apresentação de Ética em Computação.</p>
+      </div>
+      <h2>Veja o que você "aceitou":</h2>
+      <p>Compare suas respostas com as técnicas usadas em cada tela:</p>
+      <table class="summary-table">
+        <tr><td>Nome informado</td><td>${r.nome || '—'}</td></tr>
+        <tr><td>E-mail informado</td><td>${r.email || '—'}</td></tr>
+        <tr>
+          <td>Aceitou os termos<br><span class="pattern-cell">PRIVACY ZUCKERING</span></td>
+          <td>${r.aceitouTermos ? '✅ Aceitou' : '❌ Recusou'}<br><small>Os termos incluíam: ceder a alma, nomear primogênito, doar rim direito e publicar conversas privadas no Instagram.</small></td>
+        </tr>
+        <tr>
+          <td>Newsletter<br><span class="pattern-cell">CONFIRMSHAMING</span></td>
+          <td>${r.aceitouNewsletter ? '✅ Aceitou' : '❌ Recusou (corajoso)'}<br><small>O botão "não" tentava te envergonhar.</small></td>
+        </tr>
+        <tr>
+          <td>Preferências confusas<br><span class="pattern-cell">TRICK QUESTION</span></td>
+          <td>Não-ofertas: ${r.pref_naoOfertas ? 'sim' : 'não'} • Não-excluído: ${r.pref_naoExcluido ? 'sim' : 'não'} • Compartilhar com 47 parceiros: ${r.pref_compartilhar47 ? '✅ sim' : 'não'}<br><small>Dupla negação confunde o leitor. Os checkboxes vinham pré-marcados.</small></td>
+        </tr>
+        <tr>
+          <td>Plano<br><span class="pattern-cell">MISDIRECTION + SNEAK INTO BASKET</span></td>
+          <td>Plano: <strong>${r.planoEscolhido || '—'}</strong> • Backup: ${r.addon_backup ? '✅' : '❌'} • Antivírus: ${r.addon_antivirus ? '✅' : '❌'} • Seguro: ${r.addon_seguro ? '✅' : '❌'}<br><small>O "Pro" vinha pré-marcado. Adicionais já checados. Timer falso resetava sozinho.</small></td>
+        </tr>
+        <tr>
+          <td>Cartão de crédito<br><span class="pattern-cell">FORCED CONTINUITY</span></td>
+          <td>${r.forneceuCartao ? '✅ Forneceu (não foi salvo)' : '❌ Pulou'}<br><small>Cobrança automática após 7 dias. Cancelamento na madrugada.</small></td>
+        </tr>
+        <tr>
+          <td>Convidar amigos<br><span class="pattern-cell">FRIEND SPAM</span></td>
+          <td>${r.convidouAmigos ? `✅ Convidou` : '❌ Pulou'}<br><small>Spam em nome do usuário. Botão de pular ameaçava tirar bônus.</small></td>
+        </tr>
+      </table>
+      <div style="background: var(--bg); padding: 20px; border-radius: 12px; margin-top: 20px;">
+        <h3 style="font-family:var(--display); margin-bottom:8px;">📚 O que são Dark Patterns?</h3>
+        <p style="margin:0; font-size:14px;">
+          Termo cunhado por Harry Brignull em 2010, refere-se a interfaces projetadas para
+          <strong>enganar usuários</strong> e levá-los a tomar decisões que não tomariam se a interface
+          fosse honesta.
+        </p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="downloadJson()">⬇ Baixar minhas respostas (JSON)</button>
+      </div>
+      <div class="save-status ok" id="saveStatus">
+        ✓ Suas respostas foram registradas para análise da turma.
+      </div>
+      <p class="small-print" style="text-align:center;">
+        ID da sessão: <code>${state.sessionId}</code>
+      </p>
+    `;
+  },
+  onMount: async () => {
+    const ok = await saveToSheets(true);
+    const el = document.getElementById('saveStatus');
+    if (el && !ok) {
+      el.className = 'save-status err';
+      el.innerHTML = '⚠ Salvamento online indisponível. Suas respostas estão salvas localmente.';
+    }
+  }
+});
+
+window.downloadJson = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `respostas_${state.responses.nome || 'aluno'}.json`;
+  a.click();
+};
+
+function render() {
+  const app = document.getElementById('app');
+  const screen = screens[state.step];
+  const progressPct = state.step === 0 ? 0 : (state.step / (screens.length - 1)) * 100;
+  const progressHtml = state.step < screens.length - 1
+    ? `<div class="progress"><div class="progress-bar" style="width:${progressPct}%"></div></div>`
+    : '';
+  app.innerHTML = `${progressHtml}<div class="screen">${screen.render()}</div>`;
+  if (screen.onMount) screen.onMount();
+  persistLocal();
+}
+
+function next() {
+  state.step++;
+  persistLocal();
+  saveToSheets(false);
+  if (state.step >= screens.length) state.step = screens.length - 1;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
